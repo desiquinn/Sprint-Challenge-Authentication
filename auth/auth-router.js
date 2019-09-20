@@ -3,15 +3,17 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const db = require('../users/user-model.js');
+const secrets = require('../config/secrets.js');
+
 
 router.post('/register', (req, res) => {
   const user = req.body;
-  const hash = bcrypt.hashSync(user.password, 10);
+  const hash = bcrypt.hashSync(user.password, 8);
   user.password = hash;
 
   db.add(user)
     .then(saved => {
-      req.statusCode(201).json(saved);
+      res.status(201).json(saved);
     })
     .catch(err => {
       console.log('Register Error:', err);
@@ -24,6 +26,8 @@ router.post('/login', (req, res) => {
 
   db.findBy({ username })
     .then(user => {
+       console.log(user)
+       console.log(user.password)
       if(user && bcrypt.compareSync(password, user.password)) {
         const token = getToken(user);
         res.status(200).json({ token });
